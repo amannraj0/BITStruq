@@ -20,23 +20,23 @@ A full-stack developer preparation workspace designed to bring programming pract
 
 ### Home
 
-![BITStruq Home](screenshots/home.png)
+![BITStruq Home](Screenshots/home.png)
 
 ### SQL Sandbox
 
-![SQL Sandbox](screenshots/sql-sandbox.png)
+![SQL Sandbox](Screenshots/sql-sandbox.png)
 
 ### Algorithm Vault
 
-![Algorithm Vault](screenshots/algo-vault.png)
+![Algorithm Vault](Screenshots/algo-vault.png)
 
 ### Code Playground
 
-![Code Playground](screenshots/code-playground.png)
+![Code Playground](Screenshots/code-playground.png)
 
 ### Campus Exchange
 
-![Campus Exchange](screenshots/campus-exchange.png)
+![Campus Exchange](Screenshots/campus-exchange.png)
 
 ---
 
@@ -142,7 +142,7 @@ BITStruq/
 │   ├── requirements.txt
 │   └── .env.example
 │
-├── screenshots/
+├── Screenshots/
 │   ├── home.png
 │   ├── sql-sandbox.png
 │   ├── algo-vault.png
