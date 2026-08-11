@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BITStruq | Developer Vault & Sandbox</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alasql@4.3.3/dist/alasql.min.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#07090f",
+            panel: "#0d111a",
+            panel2: "#121826",
+            line: "rgba(255,255,255,.11)"
+          },
+          boxShadow: {
+            glow: "0 18px 55px rgba(34,211,238,.16)",
+            lift: "0 24px 70px rgba(0,0,0,.42)"
+          },
+          animation: {
+            float: "float 6s ease-in-out infinite",
+            shimmer: "shimmer 2.2s linear infinite",
+            scan: "scan 5.5s linear infinite",
+            fadeUp: "fadeUp .7s ease both"
+          },
+          keyframes: {
+            float: {
+              "0%, 100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-10px)" }
+            },
+            shimmer: {
+              "0%": { backgroundPosition: "0% 50%" },
+              "100%": { backgroundPosition: "200% 50%" }
+            },
+            scan: {
+              "0%": { transform: "translateY(-140%)" },
+              "100%": { transform: "translateY(540%)" }
+            },
+            fadeUp: {
+              "0%": { opacity: 0, transform: "translateY(18px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" }
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07090f;
+      --panel: #0d111a;
+      --panel-strong: #121826;
+      --text: #eef5ff;
+      --muted: #8c9aaf;
+      --line: rgba(255,255,255,.11);
+      --cyan: #22d3ee;
+      --blue: #60a5fa;
+      --indigo: #818cf8;
+      --teal: #2dd4bf;
+      --amber: #f59e0b;
+      --rose: #fb7185;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px),
+        radial-gradient(circle at 10% 10%, rgba(34,211,238,.16), transparent 32%),
+        radial-gradient(circle at 82% 12%, rgba(129,140,248,.12), transparent 30%),
+        linear-gradient(180deg, #081118 0%, #07090f 52%, #06070b 100%);
+      background-size: 64px 64px, 64px 64px, auto, auto, auto;
+      color: var(--text);
+      font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(34,211,238,.25); color: white; }
+
+    .app-shell {
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .app-shell:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, transparent 8%, rgba(45,212,191,.06), transparent 34%),
+        linear-gradient(70deg, transparent 58%, rgba(96,165,250,.055), transparent 82%);
+      opacity: .82;
+    }
+
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 18px 55px rgba(0,0,0,.28);
+      backdrop-filter: blur(18px);
+    }
+
+    .surface {
+      background: linear-gradient(180deg, rgba(18,24,38,.92), rgba(8,11,18,.96));
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 20px 60px rgba(0,0,0,.25);
+    }
+
+    .card {
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,.068), rgba(255,255,255,.032));
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(255,255,255,.06) inset;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(34,211,238,.34);
+      background: linear-gradient(180deg, rgba(255,255,255,.095), rgba(255,255,255,.044));
+      box-shadow: 0 24px 70px rgba(0,0,0,.34);
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      font-weight: 800;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      color: #03101a;
+      background: linear-gradient(135deg, #67e8f9, #60a5fa 52%, #a5b4fc);
+      box-shadow: 0 14px 40px rgba(34,211,238,.22);
+    }
+
+    .btn-secondary {
+      color: white;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.065);
+    }
+
+    .btn-danger {
+      color: #fecdd3;
+      border: 1px solid rgba(251,113,133,.28);
+      background: rgba(251,113,133,.11);
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: #dbeafe;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(34,211,238,.38);
+      background: rgba(255,255,255,.095);
+    }
+
+    .chip {
+      min-height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: .42rem;
+      padding: .28rem .72rem;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(255,255,255,.058);
+      color: #cbd5e1;
+      font-size: .75rem;
+      font-weight: 750;
+    }
+
+    .input, .select, .textarea, .code-editor {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(2,6,23,.66);
+      color: white;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .input, .select {
+      min-height: 42px;
+      padding: 0 .9rem;
+    }
+
+    .textarea {
+      min-height: 120px;
+      padding: .9rem;
+      resize: vertical;
+    }
+
+    .input:focus, .select:focus, .textarea:focus, .code-editor:focus {
+      border-color: rgba(34,211,238,.55);
+      box-shadow: 0 0 0 4px rgba(34,211,238,.09);
+      background: rgba(2,6,23,.82);
+    }
+
+    .code-editor {
+      min-height: 430px;
+      padding: 1rem;
+      resize: vertical;
+      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.65;
+      tab-size: 2;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      line-height: 1.6;
+    }
+
+    .scrollbar::-webkit-scrollbar { width: 9px; height: 9px; }
+    .scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.3); border-radius: 999px; }
+    .scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+    .nav-link {
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .62rem .78rem;
+      color: #9aa8bc;
+      font-size: .9rem;
+      font-weight: 750;
+      transition: background .18s ease, color .18s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: white;
+      background: rgba(255,255,255,.072);
+    }
+
+    .hero-title {
+      max-width: 760px;
+      color: #f8fbff;
+      font-size: clamp(2.75rem, 4.9vw, 5.1rem);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .hero-title span {
+      background: linear-gradient(90deg, #67e8f9 0%, #93c5fd 48%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      color: #bac7d8;
+      font-size: clamp(1rem, 1.2vw, 1.2rem);
+      line-height: 1.8;
+      font-weight: 500;
+    }
+
+    .eyebrow {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: .72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(103,232,249,.22);
+      background: rgba(103,232,249,.075);
+      padding: .42rem .92rem;
+      color: #dffbff;
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .preview-panel {
+      border-radius: 8px;
+      background:
+        linear-gradient(145deg, rgba(15,23,42,.94), rgba(4,8,15,.96)),
+        radial-gradient(circle at 15% 0%, rgba(34,211,238,.16), transparent 26%);
+      border: 1px solid rgba(148,163,184,.18);
+      box-shadow: 0 28px 90px rgba(0,0,0,.42), 0 1px 0 rgba(255,255,255,.08) inset;
+    }
+
+    .hero-action-card {
+      min-height: 190px;
+    }
+
+    .logo-glow {
+      filter: drop-shadow(0 0 18px rgba(34,211,238,.32));
+    }
+
+    .preview-scan {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-scan:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 18%;
+      background: linear-gradient(180deg, transparent, rgba(34,211,238,.12), transparent);
+      animation: scan 5.5s linear infinite;
+      pointer-events: none;
+    }
+
+    .loading-grid {
+      background:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(135deg, rgba(34,211,238,.16), transparent 30%),
+        #05070d;
+      background-size: 48px 48px, 48px 48px, auto, auto;
+    }
+
+    @media (max-width: 640px) {
+      body { background-size: 38px 38px, 38px 38px, auto, auto, auto; }
+      .code-editor { min-height: 320px; }
+      .hero-title { font-size: clamp(2.4rem, 13vw, 3.8rem); }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+
+    // SQL history and local settings stay in localStorage
+    const SQL_BACKUP_KEY = "bit_sql_backup";
+    const FEEDBACK_KEY = "bit_feedback";
+    const CONTACT_KEY = "bit_contact";
+
+    const save = (key, value) => {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    };
+
+    const load = (key, fallback) => {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    };
+
+    const syllabusData = [
+      {
+        category: "PPS - Module I",
+        topics: [
+          {
+            id: "pps1",
+            title: "Flowchart & Pseudo-code",
+            theory: "Flowcharts use standard symbols to visually represent algorithm flow. Pseudo-code describes logic in simple English-like steps before implementation.",
+            complexity: "Planning",
+            codes: {
+              C: "int max = a > b ? a : b;",
+              "C++": "int max = a > b ? a : b;",
+              Python: "max_value = a if a > b else b",
+              Java: "int max = a > b ? a : b;"
+            }
+          },
+          {
+            id: "pps2",
+            title: "Source Code, Variables, Memory",
+            theory: "Source code is compiled or interpreted into machine-executable behavior. Variables reserve memory locations and carry typed or dynamically typed values.",
+            complexity: "Core concept",
+            codes: {
+              C: "int x = 5;\nprintf(\"%p\", &x);",
+              "C++": "int x = 5;\ncout << &x;",
+              Python: "x = 5\nprint(id(x))",
+              Java: "int x = 5;\nSystem.out.println(x);"
+            }
+          }
+        ]
+      },
+      {
+        category: "PPS - Module II",
+        topics: [
+          {
+            id: "pps3",
+            title: "C Program Structure & Operators",
+            theory: "C programs use headers, main(), declarations, and statements. Operator precedence controls expression evaluation order.",
+            complexity: "Syntax",
+            codes: {
+              C: "#include <stdio.h>\nint main(){\n  int y = 2 + 3 * 4;\n  printf(\"%d\", y);\n  return 0;\n}",
+              "C++": "#include <iostream>\nusing namespace std;\nint main(){ cout << 2 + 3 * 4; }",
+              Python: "print(2 + 3 * 4)",
+              Java: "class Main { public static void main(String[] args){ System.out.println(2 + 3 * 4); } }"
+            }
+          },
+          {
+            id: "pps4",
+            title: "I/O and Conditional Statements",
+            theory: "Input/output and conditions let programs interact with users and choose branches using if, if-else, nested conditions, and switch cases.",
+            complexity: "O(1)",
+            codes: {
+              C: "#include <stdio.h>\nint main(){\n  int age;\n  scanf(\"%d\", &age);\n  if(age >= 18) printf(\"Adult\");\n  else printf(\"Minor\");\n  return 0;\n}",
+              "C++": "#include <iostream>\nusing namespace std;\nint main(){ int age; cin >> age; cout << (age >= 18 ? \"Adult\" : \"Minor\"); }",
+              Python: "age = int(input())\nprint('Adult' if age >= 18 else 'Minor')",
+              Java: "import java.util.*;\nclass Main { public static void main(String[] args){ Scanner sc = new Scanner(System.in); int age = sc.nextInt(); System.out.println(age >= 18 ? \"Adult\" : \"Minor\"); } }"
+            }
+          }
+        ]
+      },
+      {
+        category: "PPS - Module III",
+        topics: [
+          {
+            id: "pps5",
+            title: "Loops",
+            theory: "Loops repeat blocks of code. for is ideal for known ranges, while checks before execution, and do-while executes at least once.",
+            complexity: "O(n)",
+            codes: {
+              C: "for(int i = 0; i < 5; i++) printf(\"%d \", i);",
+              "C++": "for(int i = 0; i < 5; i++) cout << i << \" \";",
+              Python: "for i in range(5):\n    print(i, end=' ')",
+              Java: "for(int i = 0; i < 5; i++) System.out.print(i + \" \");"
+            }
+          },
+          {
+            id: "pps6",
+            title: "Arrays & Strings",
+            theory: "Arrays store sequential values. Strings are character sequences with language-specific handling and memory behavior.",
+            complexity: "O(1) access",
+            codes: {
+              C: "int arr[] = {1,2,3};\nchar name[] = \"Aman\";\nprintf(\"%d %s\", arr[0], name);",
+              "C++": "int arr[] = {1,2,3};\nstring name = \"Aman\";\ncout << arr[0] << \" \" << name;",
+              Python: "arr = [1,2,3]\nname = 'Aman'\nprint(arr[0], name)",
+              Java: "int[] arr = {1,2,3};\nString name = \"Aman\";\nSystem.out.println(arr[0] + \" \" + name);"
+            }
+          }
+        ]
+      },
+      {
+        category: "PPS - Module IV",
+        topics: [
+          {
+            id: "pps7",
+            title: "Functions & Recursion",
+            theory: "Functions modularize logic. Recursion solves problems by calling itself with a base case to stop infinite calls.",
+            complexity: "O(n)",
+            codes: {
+              C: "int fact(int n){ return n <= 1 ? 1 : n * fact(n - 1); }",
+              "C++": "int fact(int n){ return n <= 1 ? 1 : n * fact(n - 1); }",
+              Python: "def fact(n):\n    return 1 if n <= 1 else n * fact(n - 1)",
+              Java: "static int fact(int n){ return n <= 1 ? 1 : n * fact(n - 1); }"
+            }
+          }
+        ]
+      },
+      {
+        category: "PPS - Module V",
+        topics: [
+          {
+            id: "pps8",
+            title: "Structures & typedef",
+            theory: "Structures group related fields. typedef gives readable aliases, enum defines named constants, and macros perform preprocessing replacement.",
+            complexity: "Modeling",
+            codes: {
+              C: "struct Student { int roll; char name[20]; };\ntypedef struct Student Stu;",
+              "C++": "struct Student { int roll; string name; };",
+              Python: "from dataclasses import dataclass\n@dataclass\nclass Student:\n    roll: int\n    name: str",
+              Java: "class Student { int roll; String name; }"
+            }
+          },
+          {
+            id: "pps9",
+            title: "Pointers & Call by Reference",
+            theory: "Pointers store addresses. Passing addresses or references allows functions to mutate original variables.",
+            complexity: "Memory",
+            codes: {
+              C: "void swap(int *a, int *b){ int t = *a; *a = *b; *b = t; }",
+              "C++": "void swap(int &a, int &b){ int t = a; a = b; b = t; }",
+              Python: "a, b = b, a",
+              Java: "static void swap(int[] x){ int t = x[0]; x[0] = x[1]; x[1] = t; }"
+            }
+          }
+        ]
+      },
+      {
+        category: "DSA - Module I",
+        topics: [
+          {
+            id: "dsa1",
+            title: "Class & Object",
+            theory: "A class is a blueprint for objects. Encapsulation combines data and methods while access controls visibility.",
+            complexity: "OOP",
+            codes: {
+              C: "struct Rectangle { int w, h; };\nint area(struct Rectangle r){ return r.w * r.h; }",
+              "C++": "class Rectangle {\n  int w, h;\npublic:\n  Rectangle(int a,int b): w(a), h(b) {}\n  int area(){ return w * h; }\n};",
+              Python: "class Rectangle:\n    def __init__(self,w,h): self.w, self.h = w, h\n    def area(self): return self.w * self.h",
+              Java: "class Rectangle {\n  int w,h;\n  Rectangle(int w,int h){ this.w=w; this.h=h; }\n  int area(){ return w*h; }\n}"
+            }
+          }
+        ]
+      },
+      {
+        category: "DSA - Module II",
+        topics: [
+          {
+            id: "dsa2",
+            title: "Multi-dimensional Arrays",
+            theory: "2D arrays represent tables, matrices, and grids. Elements are accessed with row and column indices.",
+            complexity: "O(1) access",
+            codes: {
+              C: "int m[2][3] = {{1,2,3},{4,5,6}};\nprintf(\"%d\", m[1][2]);",
+              "C++": "int m[2][3] = {{1,2,3},{4,5,6}};\ncout << m[1][2];",
+              Python: "m = [[1,2,3],[4,5,6]]\nprint(m[1][2])",
+              Java: "int[][] m = {{1,2,3},{4,5,6}};\nSystem.out.println(m[1][2]);"
+            }
+          },
+          {
+            id: "dsa3",
+            title: "Linked Lists",
+            theory: "Linked lists store data in nodes connected by references. They support efficient insertion and deletion when node position is known.",
+            complexity: "O(1) head insert, O(n) search",
+            codes: {
+              C: "struct Node { int data; struct Node* next; };",
+              "C++": "struct Node { int data; Node* next; Node(int d): data(d), next(nullptr) {} };",
+              Python: "class Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None",
+              Java: "class Node { int data; Node next; Node(int d){ data = d; } }"
+            }
+          }
+        ]
+      },
+      {
+        category: "DSA - Module III",
+        topics: [
+          {
+            id: "dsa4",
+            title: "Stack",
+            theory: "A stack follows LIFO order. Push inserts at top and pop removes the most recently inserted item.",
+            complexity: "O(1) push/pop",
+            codes: {
+              C: "#define MAX 10\nint st[MAX], top = -1;\nvoid push(int v){ if(top < MAX-1) st[++top] = v; }\nint pop(){ return top >= 0 ? st[top--] : -1; }",
+              "C++": "#include <stack>\nstack<int> s;\ns.push(10);\ns.pop();",
+              Python: "stack = []\nstack.append(10)\nstack.pop()",
+              Java: "Stack<Integer> s = new Stack<>();\ns.push(10);\ns.pop();"
+            }
+          },
+          {
+            id: "dsa5",
+            title: "Queue",
+            theory: "A queue follows FIFO order. Circular queues reuse freed space and priority queues remove by priority.",
+            complexity: "O(1) enqueue/dequeue",
+            codes: {
+              C: "#define SIZE 5\nint q[SIZE], front = 0, rear = 0;\nvoid enq(int v){ q[rear++ % SIZE] = v; }",
+              "C++": "#include <queue>\nqueue<int> q;\nq.push(5);\nq.pop();",
+              Python: "from collections import deque\nq = deque()\nq.append(1)\nq.popleft()",
+              Java: "Queue<Integer> q = new LinkedList<>();\nq.add(1);\nq.poll();"
+            }
+          }
+        ]
+      },
+      {
+        category: "DSA - Module IV",
+        topics: [
+          {
+            id: "dsa6",
+            title: "Linear Search",
+            theory: "Linear search checks every element until the target is found. It works on unsorted arrays.",
+            complexity: "O(n)",
+            codes: {
+              C: "int linear(int a[], int n, int key){\n  for(int i=0;i<n;i++) if(a[i]==key) return i;\n  return -1;\n}",
+              "C++": "int linear(vector<int>& a, int key){\n  for(int i=0;i<a.size();i++) if(a[i]==key) return i;\n  return -1;\n}",
+              Python: "def linear(a, key):\n    for i, x in enumerate(a):\n        if x == key: return i\n    return -1",
+              Java: "int linear(int[] a, int key){\n  for(int i=0;i<a.length;i++) if(a[i]==key) return i;\n  return -1;\n}"
+            }
+          },
+          {
+            id: "dsa7",
+            title: "Binary Search",
+            theory: "Binary search repeatedly halves a sorted search space to locate a target efficiently.",
+            complexity: "O(log n)",
+            codes: {
+              C: "int binary(int a[], int n, int key){\n  int l=0,r=n-1;\n  while(l<=r){\n    int m=l+(r-l)/2;\n    if(a[m]==key) return m;\n    if(a[m]<key) l=m+1; else r=m-1;\n  }\n  return -1;\n}",
+              "C++": "int binary(vector<int>& a, int key){\n  int l=0,r=a.size()-1;\n  while(l<=r){ int m=l+(r-l)/2; if(a[m]==key) return m; if(a[m]<key) l=m+1; else r=m-1; }\n  return -1;\n}",
+              Python: "def binary(a, key):\n    l, r = 0, len(a)-1\n    while l <= r:\n        m = (l+r)//2\n        if a[m] == key: return m\n        if a[m] < key: l = m + 1\n        else: r = m - 1\n    return -1",
+              Java: "int binary(int[] a, int key){\n  int l=0,r=a.length-1;\n  while(l<=r){ int m=l+(r-l)/2; if(a[m]==key) return m; if(a[m]<key) l=m+1; else r=m-1; }\n  return -1;\n}"
+            }
+          },
+          {
+            id: "dsa8",
+            title: "Bubble Sort",
+            theory: "Bubble sort repeatedly swaps adjacent elements until the array is ordered.",
+            complexity: "O(n^2)",
+            codes: {
+              C: "void bubble(int a[], int n){\n  for(int i=0;i<n-1;i++)\n    for(int j=0;j<n-i-1;j++)\n      if(a[j]>a[j+1]){ int t=a[j]; a[j]=a[j+1]; a[j+1]=t; }\n}",
+              "C++": "void bubble(vector<int>& a){\n  for(int i=0;i<a.size()-1;i++)\n    for(int j=0;j<a.size()-i-1;j++)\n      if(a[j]>a[j+1]) swap(a[j], a[j+1]);\n}",
+              Python: "def bubble(a):\n    for i in range(len(a)-1):\n        for j in range(len(a)-i-1):\n            if a[j] > a[j+1]: a[j], a[j+1] = a[j+1], a[j]",
+              Java: "void bubble(int[] a){\n  for(int i=0;i<a.length-1;i++)\n    for(int j=0;j<a.length-i-1;j++)\n      if(a[j]>a[j+1]){ int t=a[j]; a[j]=a[j+1]; a[j+1]=t; }\n}"
+            }
+          },
+          {
+            id: "dsa9",
+            title: "Quick Sort",
+            theory: "Quick sort partitions around a pivot and recursively sorts both sides.",
+            complexity: "O(n log n) avg",
+            codes: {
+              C: "int partition(int a[], int l, int h){\n  int p=a[h], i=l-1;\n  for(int j=l;j<h;j++) if(a[j]<=p){ i++; int t=a[i]; a[i]=a[j]; a[j]=t; }\n  int t=a[i+1]; a[i+1]=a[h]; a[h]=t;\n  return i+1;\n}",
+              "C++": "int partition(vector<int>& a,int l,int h){\n  int p=a[h], i=l-1;\n  for(int j=l;j<h;j++) if(a[j]<=p) swap(a[++i], a[j]);\n  swap(a[i+1], a[h]);\n  return i+1;\n}",
+              Python: "def quick(a):\n    if len(a) <= 1: return a\n    p = a[0]\n    return quick([x for x in a[1:] if x <= p]) + [p] + quick([x for x in a[1:] if x > p])",
+              Java: "int partition(int[] a,int l,int h){\n  int p=a[h], i=l-1;\n  for(int j=l;j<h;j++) if(a[j]<=p){ i++; int t=a[i]; a[i]=a[j]; a[j]=t; }\n  int t=a[i+1]; a[i+1]=a[h]; a[h]=t;\n  return i+1;\n}"
+            }
+          }
+        ]
+      },
+      {
+        category: "DSA - Module V",
+        topics: [
+          {
+            id: "dsa10",
+            title: "Binary Search Tree",
+            theory: "A BST stores smaller keys on the left and larger keys on the right. Inorder traversal returns sorted order.",
+            complexity: "O(log n) avg",
+            codes: {
+              C: "struct Node { int data; struct Node *left, *right; };",
+              "C++": "struct Node { int data; Node *left, *right; };\nNode* insert(Node* r,int v){ if(!r) return new Node{v,nullptr,nullptr}; if(v<r->data) r->left=insert(r->left,v); else r->right=insert(r->right,v); return r; }",
+              Python: "class Node:\n    def __init__(self,v): self.val, self.left, self.right = v, None, None",
+              Java: "class Node { int data; Node left,right; Node(int d){ data=d; } }"
+            }
+          },
+          {
+            id: "dsa11",
+            title: "Graph BFS & DFS",
+            theory: "BFS explores level by level using a queue. DFS explores deep paths using recursion or a stack.",
+            complexity: "O(V + E)",
+            codes: {
+              C: "// BFS: use visited array + queue over adjacency matrix/list.",
+              "C++": "void bfs(vector<int> adj[], int s, int n){\n  vector<bool> vis(n,false); queue<int> q;\n  q.push(s); vis[s]=true;\n  while(!q.empty()){ int u=q.front(); q.pop(); cout<<u<<' '; for(int v:adj[u]) if(!vis[v]) vis[v]=true, q.push(v); }\n}",
+              Python: "from collections import deque\ndef bfs(g, s):\n    seen, q = {s}, deque([s])\n    while q:\n        u = q.popleft(); print(u, end=' ')\n        for v in g[u]:\n            if v not in seen: seen.add(v); q.append(v)",
+              Java: "void bfs(ArrayList<Integer>[] g, int s){\n  boolean[] seen = new boolean[g.length];\n  Queue<Integer> q = new LinkedList<>();\n  q.add(s); seen[s] = true;\n}"
+            }
+          }
+        ]
+      }
+    ];
+
+    const Icon = ({ name, className = "" }) => <i className={`fa-solid ${name} ${className}`}></i>;
+
+    const BitSymbol = ({ size = 40, className = "" }) => (
+      <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <defs>
+          <linearGradient id={`logoGrad-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="54%" stopColor="#60a5fa" />
+            <stop offset="100%" stopColor="#818cf8" />
+          </linearGradient>
+        </defs>
+        <rect x="4" y="4" width="32" height="32" rx="8" stroke={`url(#logoGrad-${size})`} strokeWidth="2.5" fill="rgba(34,211,238,.06)" />
+        <path d="M12 20 L16 14 L20 20 L24 14 L24 26" stroke={`url(#logoGrad-${size})`} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </svg>
+    );
+
+    const SparkleIcon = ({ className = "" }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+        <path d="M5 3v4M3 5h4"/>
+      </svg>
+    );
+
+    const Logo = () => (
+      <div className="flex items-center gap-3">
+        <div className="logo-glow relative grid h-12 w-12 place-items-center rounded-lg border border-cyan-300/25 bg-cyan-300/10">
+          <BitSymbol size={42} />
+          <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(52,211,153,.85)]"></span>
+        </div>
+        <div>
+          <div className="text-[1.35rem] font-extrabold leading-none tracking-tight text-white">BITStruq</div>
+          <div className="mt-1 text-[10px] font-extrabold uppercase tracking-[.22em] text-cyan-200/75">Developer Vault</div>
+        </div>
+      </div>
+    );
+
+    const useToast = () => {
+      const [toast, setToast] = useState("");
+      const showToast = (message) => {
+        setToast(message);
+        setTimeout(() => setToast(""), 2300);
+      };
+      return { toast, showToast };
+    };
+
+    const Toast = ({ message }) => message ? (
+      <div className="fixed bottom-6 left-1/2 z-[90] -translate-x-1/2 rounded-lg border border-white/10 bg-slate-950/95 px-4 py-3 text-sm font-bold text-white shadow-lift backdrop-blur-xl">
+        {message}
+      </div>
+    ) : null;
+
+    const Modal = ({ title, children, onClose, wide = false }) => (
+      <div className="fixed inset-0 z-[100] grid place-items-center bg-black/72 p-4 backdrop-blur-sm">
+        <div className={`surface max-h-[88vh] w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-auto rounded-lg p-5`}>
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h3 className="text-lg font-black text-white">{title}</h3>
+            <button className="icon-btn" onClick={onClose} aria-label="Close">
+              <Icon name="fa-xmark" />
+            </button>
+          </div>
+          {children}
+        </div>
+      </div>
+    );
+
+    const Navbar = ({ currentView, setCurrentView }) => {
+      const [open, setOpen] = useState(false);
+      const links = [
+        ["home", "fa-house", "Home"],
+        ["sandbox", "fa-database", "SQL"],
+        ["vault", "fa-layer-group", "Vault"],
+        ["playground", "fa-code", "Code"],
+        ["exchange", "fa-comments", "Exchange"]
+      ];
+
+      const NavLinks = ({ mobile = false }) => links.map(([view, icon, label]) => (
+        <button
+          key={view}
+          onClick={() => { setCurrentView(view); setOpen(false); }}
+          className={`nav-link ${currentView === view ? "active" : ""} ${mobile ? "w-full justify-start" : ""}`}
+        >
+          <Icon name={icon} /> {label}
+        </button>
+      ));
+
+      return (
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07090f]/82 backdrop-blur-2xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <button onClick={() => setCurrentView("home")} className="text-left">
+              <Logo />
+            </button>
+
+            <nav className="hidden items-center rounded-lg border border-white/10 bg-white/[.04] p-1.5 shadow-[0_12px_30px_rgba(0,0,0,.18)] md:flex">
+              <NavLinks />
+            </nav>
+
+            <div className="hidden items-center gap-2 lg:flex">
+              <span className="chip"><span className="h-2 w-2 rounded-full bg-emerald-300"></span> API Ready</span>
+            </div>
+
+            <button className="icon-btn md:hidden" onClick={() => setOpen(v => !v)} aria-label="Toggle menu">
+              <Icon name={open ? "fa-xmark" : "fa-bars"} />
+            </button>
+          </div>
+
+          {open && (
+            <div className="border-t border-white/10 bg-[#07090f]/95 p-3 md:hidden">
+              <div className="grid gap-1">
+                <NavLinks mobile />
+              </div>
+            </div>
+          )}
+        </header>
+      );
+    };
+
+    const LoadingScreen = () => {
+      const [dots, setDots] = useState("");
+      const [imageOk, setImageOk] = useState(true);
+
+      useEffect(() => {
+        const interval = setInterval(() => setDots(d => d.length >= 3 ? "" : d + "."), 450);
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <div className="loading-grid relative grid min-h-screen place-items-center overflow-hidden px-6">
+          <div className="relative z-10 text-center">
+            <div className="mx-auto mb-6 grid h-32 w-32 place-items-center rounded-lg border border-cyan-300/25 bg-white/[.045] shadow-glow backdrop-blur-xl animate-float">
+              {imageOk ? (
+                <img
+                  src="./Gemini_Generated_Image_jw32gmjw32gmjw32-clean.png"
+                  onError={() => setImageOk(false)}
+                  alt="BITStruq loading"
+                  className="h-24 w-24 object-contain"
+                />
+              ) : (
+                <BitSymbol size={92} className="logo-glow" />
+              )}
+            </div>
+            <div className="mb-3 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[.24em] text-cyan-100">
+              <span className="h-2 w-2 rounded-full bg-emerald-300"></span>
+              BITStruq
+            </div>
+            <p className="text-sm font-black uppercase tracking-[.18em] text-slate-400">
+              Initializing Workspace<span className="inline-block w-8 text-cyan-200">{dots}</span>
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    const AIAssistant = ({ contextArea, onApplyCode, showToast }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [messages, setMessages] = useState([{ role: "ai", text: `Hi. Ask me to generate code or explain ${contextArea}.` }]);
+      const [input, setInput] = useState("");
+      const [isTyping, setIsTyping] = useState(false);
+      const [position, setPosition] = useState({ x: Math.max(14, window.innerWidth - 84), y: Math.max(14, window.innerHeight - 88) });
+      const drag = useRef({ active: false, moved: false, dx: 0, dy: 0 });
+      const messagesEndRef = useRef(null);
+
+      useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, [messages, isTyping]);
+
+      useEffect(() => {
+        const move = (event) => {
+          if (!drag.current.active) return;
+          drag.current.moved = true;
+          const nextX = Math.min(window.innerWidth - 64, Math.max(10, event.clientX - drag.current.dx));
+          const nextY = Math.min(window.innerHeight - 64, Math.max(10, event.clientY - drag.current.dy));
+          setPosition({ x: nextX, y: nextY });
+        };
+        const up = () => {
+          drag.current.active = false;
+          setTimeout(() => { drag.current.moved = false; }, 0);
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", up);
+        return () => {
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", up);
+        };
+      }, []);
+
+      const renderMessage = (text) => {
+        const parts = text.split(/(```[\s\S]*?```)/g);
+        return parts.map((part, index) => {
+          if (part.startsWith("```") && part.endsWith("```")) {
+            const code = part.replace(/```[a-zA-Z]*\n?/i, "").replace(/```$/, "").trim();
+            return (
+              <div key={index} className="relative my-3">
+                <pre className="scrollbar mono max-h-60 overflow-auto rounded-lg border border-white/10 bg-black/70 p-3 pt-10 text-xs text-emerald-300">{code}</pre>
+                {onApplyCode && (
+                  <button
+                    onClick={() => { onApplyCode(code); showToast?.("Code applied"); }}
+                    className="absolute right-2 top-2 rounded-md bg-cyan-300 px-2.5 py-1 text-[11px] font-black text-slate-950"
+                  >
+                    Apply
+                  </button>
+                )}
+              </div>
+            );
+          }
+          return <span key={index}>{part}</span>;
+        });
+      };
+
+      const send = async () => {
+        if (!input.trim()) return;
+        const userText = input.trim();
+        setInput("");
+        setMessages(prev => [...prev, { role: "user", text: userText }]);
+        setIsTyping(true);
+        try {
+          const prompt = `You are BITStruq assistant for ${contextArea}. Be concise, helpful, and include clean code blocks when useful. User: ${userText}`;
+          
+          // SECURE FETCH: Talks to Python backend
+          const response = await fetch(`https://bitstruq-backend.onrender.com/api/ai`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: prompt })
+          });
+          
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || `Request failed: ${response.status}`);
+          
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+          setMessages(prev => [...prev, { role: "ai", text }]);
+        } catch (error) {
+          setMessages(prev => [...prev, { role: "ai", text: `Request failed: ${error.message}` }]);
+        } finally {
+          setIsTyping(false);
+        }
+      };
+
+      return (
+        <>
+          {isOpen && (
+            <div
+              className="fixed z-[70] flex h-[520px] w-[min(390px,calc(100vw-24px))] flex-col overflow-hidden rounded-lg border border-white/10 bg-slate-950/95 shadow-lift backdrop-blur-xl"
+              style={{ left: Math.min(window.innerWidth - 402, Math.max(12, position.x - 330)), top: Math.max(12, position.y - 530) }}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 bg-white/[.045] p-3">
+                <div className="flex items-center gap-2 font-black text-white">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-cyan-300/12 text-cyan-200">
+                    <SparkleIcon />
+                  </span>
+                  Gemini Assistant
+                </div>
+                <button className="icon-btn h-8 w-8" onClick={() => setIsOpen(false)} aria-label="Close assistant">
+                  <Icon name="fa-xmark" />
+                </button>
+              </div>
+
+              <div className="scrollbar flex-1 space-y-3 overflow-auto p-3">
+                {messages.map((message, index) => (
+                  <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[88%] rounded-lg p-3 text-sm leading-relaxed ${message.role === "user" ? "bg-cyan-300 text-slate-950 font-bold" : "border border-white/10 bg-white/[.055] text-slate-200"}`}>
+                      {message.role === "user" ? message.text : renderMessage(message.text)}
+                    </div>
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="flex gap-1 pl-1">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-500"></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-500" style={{ animationDelay: ".12s" }}></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-500" style={{ animationDelay: ".24s" }}></span>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="border-t border-white/10 p-3">
+                <div className="flex gap-2">
+                  <input
+                    className="input"
+                    value={input}
+                    onChange={event => setInput(event.target.value)}
+                    onKeyDown={event => event.key === "Enter" && send()}
+                    placeholder={`Ask about ${contextArea}`}
+                  />
+                  <button className="icon-btn bg-cyan-300 text-slate-950" onClick={send} aria-label="Send">
+                    <Icon name="fa-paper-plane" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button
+            className="fixed z-[60] grid h-14 w-14 place-items-center rounded-lg bg-gradient-to-br from-cyan-300 via-blue-400 to-indigo-400 text-slate-950 shadow-glow transition hover:scale-105"
+            style={{ left: position.x, top: position.y }}
+            onPointerDown={(event) => {
+              drag.current = { active: true, moved: false, dx: event.clientX - position.x, dy: event.clientY - position.y };
+            }}
+            onClick={() => {
+              if (!drag.current.moved) setIsOpen(value => !value);
+            }}
+            aria-label="Open AI assistant"
+          >
+            {isOpen ? <Icon name="fa-xmark" /> : <SparkleIcon />}
+          </button>
+        </>
+      );
+    };
+
+    const Stat = ({ icon, label, value, tone = "cyan" }) => {
+      const tones = {
+        cyan: "text-cyan-200 bg-cyan-300/10",
+        amber: "text-amber-200 bg-amber-300/10",
+        rose: "text-rose-200 bg-rose-300/10",
+        indigo: "text-indigo-200 bg-indigo-300/10"
+      };
+
+      return (
+        <div className="card p-4">
+          <div className={`mb-4 grid h-10 w-10 place-items-center rounded-lg ${tones[tone]}`}>
+            <Icon name={icon} />
+          </div>
+          <div className="text-2xl font-black text-white">{value}</div>
+          <div className="mt-1 text-sm font-semibold text-slate-400">{label}</div>
+        </div>
+      );
+    };
+
+    const DashboardPreview = () => (
+      <div className="preview-scan preview-panel p-4 sm:p-5">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded-full bg-rose-400"></span>
+            <span className="h-3 w-3 rounded-full bg-amber-400"></span>
+            <span className="h-3 w-3 rounded-full bg-emerald-400"></span>
+          </div>
+          <span className="chip"><Icon name="fa-bolt" /> Live Prep OS</span>
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-[1.15fr_.85fr]">
+          <div className="rounded-lg border border-white/10 bg-black/45 p-4 sm:p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-extrabold uppercase tracking-[.18em] text-slate-500">SQL Console</span>
+              <span className="text-xs font-bold text-emerald-300">24 ms</span>
+            </div>
+            <pre className="mono text-sm text-slate-300"><span className="text-cyan-300">SELECT</span> topic, score{"\n"}<span className="text-cyan-300">FROM</span> prep_vault{"\n"}<span className="text-cyan-300">WHERE</span> module = <span className="text-amber-300">'DSA'</span>;</pre>
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-black/45 p-4 sm:p-5">
+            <div className="mb-3 text-xs font-extrabold uppercase tracking-[.18em] text-slate-500">Practice Flow</div>
+            <div className="flex h-28 items-end gap-2">
+              {[48, 72, 56, 88, 68, 96, 78].map((height, index) => (
+                <div key={index} className="flex-1 rounded-t-md bg-gradient-to-t from-cyan-500 to-emerald-300" style={{ height: `${height}%`, opacity: .55 + index * .05 }}></div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {[
+            ["BST", "O(log n)", 84],
+            ["Quick Sort", "O(n log n)", 76],
+            ["Graph BFS", "O(V+E)", 91]
+          ].map(([name, complexity, percent]) => (
+            <div key={name} className="rounded-lg border border-white/10 bg-white/[.045] p-3.5">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-extrabold text-white">{name}</span>
+                <span className="text-[11px] font-bold text-cyan-200">{complexity}</span>
+              </div>
+              <div className="h-2 rounded-full bg-white/10">
+                <div className="h-2 rounded-full bg-cyan-300" style={{ width: `${percent}%` }}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    const HomePage = ({ setCurrentView }) => {
+      const topicCount = syllabusData.reduce((sum, group) => sum + group.topics.length, 0);
+      const actions = [
+        { view: "sandbox", icon: "fa-database", title: "SQL Sandbox", desc: "Run DDL, DML, joins, groups, and query drills inside the browser.", tone: "cyan" },
+        { view: "vault", icon: "fa-layer-group", title: "Algo Vault", desc: "PPS and DSA theory with clean C, C++, Python, and Java snippets.", tone: "indigo" },
+        { view: "playground", icon: "fa-code", title: "Code Playground", desc: "Compile and execute programs with stdin and live output.", tone: "amber" },
+        { view: "exchange", icon: "fa-comments", title: "Campus Exchange", desc: "Save and search placement experiences locally.", tone: "rose" }
+      ];
+
+      return (
+        <main className="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
+          <section className="grid items-center gap-8 lg:grid-cols-[.86fr_1.14fr]">
+            <div className="animate-fadeUp">
+              <div className="eyebrow mb-6">
+                <span className="grid h-5 w-5 place-items-center">
+                  <BitSymbol size={20} />
+                </span>
+                BIT Mesra Prep Engine
+              </div>
+              <h1 className="hero-title">
+                Developer Vault for <span>SQL, DSA & Code</span>
+              </h1>
+              <p className="hero-copy mt-6">
+                A refined BITStruq workspace for query practice, syllabus revision, coding drills, Gemini help, custom snippets, and campus interview notes.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <button onClick={() => setCurrentView("sandbox")} className="btn btn-primary px-6">
+                  <Icon name="fa-play" /> Start Practicing
+                </button>
+                <button onClick={() => setCurrentView("vault")} className="btn btn-secondary px-6">
+                  <Icon name="fa-layer-group" /> Open Vault
+                </button>
+              </div>
+            </div>
+
+            <div className="animate-fadeUp" style={{ animationDelay: ".08s" }}>
+              <DashboardPreview />
+            </div>
+          </section>
+
+          <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat icon="fa-book-open" value={topicCount} label="Curated topics" tone="cyan" />
+            <Stat icon="fa-code" value="4" label="Languages" tone="indigo" />
+            <Stat icon="fa-database" value="SQL" label="Browser database" tone="amber" />
+            <Stat icon="fa-wand-magic-sparkles" value="AI" label="Gemini assistant" tone="rose" />
+          </section>
+
+          <section className="mt-8 grid gap-4 lg:grid-cols-4">
+            {actions.map(action => (
+              <button key={action.view} onClick={() => setCurrentView(action.view)} className="card hero-action-card p-5 text-left">
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-white/[.065] text-cyan-200">
+                    <Icon name={action.icon} />
+                  </div>
+                  <Icon name="fa-arrow-right" className="text-slate-500" />
+                </div>
+                <h3 className="text-lg font-black text-white">{action.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{action.desc}</p>
+              </button>
+            ))}
+          </section>
+        </main>
+      );
+    };
+
+    const SandboxView = ({ showToast }) => {
+      const defaultQuery = "CREATE TABLE Emp(id INT, name STRING, score INT);\nINSERT INTO Emp VALUES (1, 'Aman', 92), (2, 'Ananya', 96);\nSELECT * FROM Emp ORDER BY score DESC;";
+      const [query, setQuery] = useState(defaultQuery);
+      const [result, setResult] = useState([]);
+      const [message, setMessage] = useState("Ready");
+      const [error, setError] = useState("");
+      const [running, setRunning] = useState(false);
+      const [history, setHistory] = useState(() => load(SQL_BACKUP_KEY, []));
+
+      useEffect(() => {
+        try {
+          alasql("CREATE DATABASE IF NOT EXISTS bit_db; USE bit_db;");
+          history.forEach(sql => { try { alasql(sql); } catch (e) {} });
+        } catch (e) {}
+      }, []);
+
+      const templates = [
+        ["Starter", defaultQuery],
+        ["Join", "CREATE TABLE Dept(id INT, dept STRING);\nINSERT INTO Dept VALUES (1, 'CSE'), (2, 'ECE');\nSELECT Emp.name, Dept.dept FROM Emp JOIN Dept ON Emp.id = Dept.id;"],
+        ["Group", "SELECT score, COUNT(*) AS total FROM Emp GROUP BY score;"],
+        ["Clean", "DROP TABLE IF EXISTS Emp;"]
+      ];
+
+      const execute = () => {
+        if (!query.trim()) return;
+        setRunning(true);
+        setError("");
+        setResult([]);
+        setMessage("Running");
+
+        setTimeout(() => {
+          try {
+            const response = alasql(query);
+            const looksLikeRows = (value) =>
+              Array.isArray(value) &&
+              (value.length === 0 || (typeof value[0] === "object" && value[0] !== null && !Array.isArray(value[0])));
+            let data = [];
+            if (looksLikeRows(response)) {
+              data = response;
+            } else if (Array.isArray(response)) {
+              const rowSets = response.filter(looksLikeRows);
+              data = rowSets.length ? rowSets[rowSets.length - 1] : [];
+            }
+
+            if (/^\s*(CREATE|INSERT|UPDATE|DELETE|DROP|ALTER)\b/i.test(query)) {
+              const updated = [query, ...history.filter(item => item !== query)].slice(0, 8);
+              setHistory(updated);
+              save(SQL_BACKUP_KEY, updated);
+            }
+
+            setResult(data);
+            const expectsRows = /\b(SELECT|SHOW|WITH)\b/i.test(query);
+            setMessage(data.length || expectsRows ? `Query OK - ${data.length} row${data.length === 1 ? "" : "s"}` : "Query executed");
+          } catch (err) {
+            setError(err.message);
+            setMessage("Query failed");
+          } finally {
+            setRunning(false);
+          }
+        }, 350);
+      };
+
+      const reset = () => {
+        try {
+          alasql("DROP DATABASE IF EXISTS bit_db; CREATE DATABASE bit_db; USE bit_db;");
+        } catch (e) {}
+        setHistory([]);
+        save(SQL_BACKUP_KEY, []);
+        setResult([]);
+        setError("");
+        setMessage("Database reset");
+        showToast("Database reset");
+      };
+
+      return (
+        <>
+          <AIAssistant contextArea="SQL" onApplyCode={setQuery} showToast={showToast} />
+          <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_1fr]">
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h1 className="text-3xl font-black text-white">SQL Sandbox</h1>
+                  <p className="mt-1 text-sm font-semibold text-slate-400">AlaSQL workspace with saved local schema history.</p>
+                </div>
+                <button className="btn btn-danger px-4" onClick={reset}>
+                  <Icon name="fa-rotate-left" /> Reset
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {templates.map(([name, sql]) => (
+                  <button key={name} className="chip hover:border-cyan-300/40" onClick={() => setQuery(sql)}>{name}</button>
+                ))}
+              </div>
+
+              <div className="surface overflow-hidden rounded-lg">
+                <textarea className="code-editor border-0 bg-transparent" value={query} onChange={event => setQuery(event.target.value)} />
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 p-3">
+                  <span className="text-sm font-bold text-slate-500">{query.split("\n").length} lines</span>
+                  <button className="btn btn-primary px-6" onClick={execute} disabled={running}>
+                    <Icon name={running ? "fa-circle-notch fa-spin" : "fa-play"} /> {running ? "Running" : "Execute"}
+                  </button>
+                </div>
+              </div>
+
+              {history.length > 0 && (
+                <div className="surface rounded-lg p-4">
+                  <div className="mb-3 text-xs font-black uppercase tracking-[.18em] text-slate-500">Recent schema changes</div>
+                  <div className="grid gap-2">
+                    {history.slice(0, 4).map((item, index) => (
+                      <button key={index} onClick={() => setQuery(item)} className="truncate rounded-lg border border-white/10 bg-white/[.035] px-3 py-2 text-left mono text-xs text-slate-400 hover:text-white">
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-2xl font-black text-white">Output</h2>
+                <span className={`chip ${error ? "text-rose-200" : "text-emerald-200"}`}>
+                  <Icon name={error ? "fa-triangle-exclamation" : "fa-check"} /> {message}
+                </span>
+              </div>
+
+              <div className="surface min-h-[560px] overflow-hidden rounded-lg">
+                {running && (
+                  <div className="grid h-[560px] place-items-center text-cyan-200">
+                    <div className="text-center">
+                      <Icon name="fa-circle-notch fa-spin" className="mb-3 text-3xl" />
+                      <div className="font-black">Executing query</div>
+                    </div>
+                  </div>
+                )}
+
+                {!running && error && (
+                  <pre className="mono whitespace-pre-wrap p-5 text-sm text-rose-300">{error}</pre>
+                )}
+
+                {!running && !error && result.length === 0 && (
+                  <div className="grid h-[560px] place-items-center p-6 text-center text-slate-500">
+                    <div>
+                      <Icon name="fa-table" className="mb-4 text-4xl text-slate-700" />
+                      <div className="font-black">{message}</div>
+                    </div>
+                  </div>
+                )}
+
+                {!running && !error && result.length > 0 && (
+                  <div className="scrollbar overflow-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="sticky top-0 bg-slate-950 text-xs uppercase tracking-[.14em] text-slate-500">
+                        <tr>
+                          {Object.keys(result[0]).map(column => <th key={column} className="border-b border-white/10 px-4 py-3">{column}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.map((row, index) => (
+                          <tr key={index} className="border-b border-white/[.06] hover:bg-white/[.04]">
+                            {Object.values(row).map((value, columnIndex) => (
+                              <td key={columnIndex} className={`px-4 py-3 ${typeof value === "number" ? "text-cyan-200" : "text-slate-300"}`}>
+                                {String(value)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </section>
+          </main>
+        </>
+      );
+    };
+
+    const VaultView = ({ showToast }) => {
+      const [category, setCategory] = useState("");
+      const [language, setLanguage] = useState("C");
+      const [search, setSearch] = useState("");
+      const [selectedId, setSelectedId] = useState("dsa7");
+      
+      const [snippets, setSnippets] = useState([]);
+      const [addOpen, setAddOpen] = useState(false);
+      const [form, setForm] = useState({ title: "", language: "Python", complexity: "O(1)", code: "", notes: "" });
+
+      useEffect(() => {
+        fetch("https://bitstruq-backend.onrender.com/api/snippets")
+          .then(res => res.json())
+          .then(data => setSnippets(data))
+          .catch(err => console.error("Failed to load snippets:", err));
+      }, []);
+
+      const allTopics = useMemo(() => syllabusData.flatMap(group => group.topics.map(topic => ({ ...topic, category: group.category }))), []);
+      const filtered = allTopics.filter(topic => {
+        const matchesCategory = !category || topic.category === category;
+        const content = `${topic.title} ${topic.theory} ${topic.category}`.toLowerCase();
+        return matchesCategory && content.includes(search.toLowerCase());
+      });
+      const selected = filtered.find(topic => topic.id === selectedId) || filtered[0] || allTopics[0];
+
+      const copy = async (text) => {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("Copied to clipboard");
+        } catch (e) {
+          showToast("Copy unavailable");
+        }
+      };
+
+      const addSnippet = async (event) => {
+        event.preventDefault();
+        try {
+          const response = await fetch("https://bitstruq-backend.onrender.com/api/snippets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form)
+          });
+          if (response.ok) {
+            const newSnippet = { ...form, id: Date.now() }; 
+            setSnippets([newSnippet, ...snippets]);
+            setAddOpen(false);
+            setForm({ title: "", language: "Python", complexity: "O(1)", code: "", notes: "" });
+            showToast("Snippet saved to Cloud!");
+          } else {
+             showToast("Failed to save snippet");
+          }
+        } catch (err) {
+          showToast("Failed to save snippet");
+        }
+      };
+
+      return (
+        <>
+          <AIAssistant contextArea="Algorithms" showToast={showToast} />
+          
+          <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[300px_1fr]">
+            <aside className="space-y-4">
+              <div>
+                <h1 className="text-3xl font-black text-white">Algo Vault</h1>
+                <p className="mt-1 text-sm font-semibold text-slate-400">Syllabus notes, code, and custom snippets.</p>
+              </div>
+
+              <input className="input" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search topics" />
+
+              <div className="surface rounded-lg p-3">
+                <button onClick={() => setCategory("")} className={`mb-1 w-full rounded-lg px-3 py-2 text-left text-sm font-black ${!category ? "bg-cyan-300/12 text-cyan-200" : "text-slate-400 hover:bg-white/[.04]"}`}>
+                  All Topics
+                </button>
+                {syllabusData.map(group => (
+                  <button key={group.category} onClick={() => setCategory(group.category)} className={`mb-1 w-full rounded-lg px-3 py-2 text-left text-sm font-black ${category === group.category ? "bg-cyan-300/12 text-cyan-200" : "text-slate-400 hover:bg-white/[.04]"}`}>
+                    {group.category}
+                  </button>
+                ))}
+              </div>
+
+              <div className="surface rounded-lg p-3">
+                <div className="mb-2 text-xs font-black uppercase tracking-[.18em] text-slate-500">Language</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {["C", "C++", "Python", "Java"].map(item => (
+                    <button key={item} onClick={() => setLanguage(item)} className={`rounded-lg px-3 py-2 text-sm font-black ${language === item ? "bg-cyan-300 text-slate-950" : "bg-white/[.05] text-slate-300"}`}>
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button className="btn btn-secondary w-full" onClick={() => setAddOpen(true)}>
+                <Icon name="fa-plus" /> Add Snippet
+              </button>
+            </aside>
+
+            <section className="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
+              <div className="surface rounded-lg p-3">
+                <div className="mb-3 px-1 text-xs font-black uppercase tracking-[.18em] text-slate-500">{filtered.length} topics</div>
+                <div className="scrollbar grid max-h-[720px] gap-2 overflow-auto pr-1">
+                  {filtered.map(topic => (
+                    <button key={topic.id} onClick={() => setSelectedId(topic.id)} className={`rounded-lg border p-4 text-left ${selected?.id === topic.id ? "border-cyan-300/45 bg-cyan-300/10" : "border-white/10 bg-white/[.035] hover:bg-white/[.055]"}`}>
+                      <div className="font-black text-white">{topic.title}</div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <span className="chip">{topic.category.replace(" - ", " ")}</span>
+                        <span className="chip">{topic.complexity}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <article className="surface rounded-lg p-5">
+                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="mb-2 text-xs font-black uppercase tracking-[.18em] text-cyan-200">{selected.category}</div>
+                      <h2 className="text-2xl font-black text-white">{selected.title}</h2>
+                    </div>
+                    <span className="chip"><Icon name="fa-gauge-high" /> {selected.complexity}</span>
+                  </div>
+
+                  <p className="mb-5 leading-7 text-slate-300">{selected.theory}</p>
+
+                  <div className="overflow-hidden rounded-lg border border-white/10 bg-black/55">
+                    <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                      <span className="text-sm font-black text-slate-300">{language}</span>
+                      <button className="icon-btn h-8 w-8" onClick={() => copy(selected.codes?.[language] || "")} aria-label="Copy code">
+                        <Icon name="fa-copy" />
+                      </button>
+                    </div>
+                    <pre className="scrollbar mono max-h-[420px] overflow-auto p-4 text-sm text-slate-200"><code>{selected.codes?.[language] || selected.codes?.C || "// Code not available"}</code></pre>
+                  </div>
+                </article>
+
+                <section>
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-xl font-black text-white">Custom Snippets</h3>
+                    <span className="chip">{snippets.length}</span>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {snippets.map(snippet => (
+                      <div key={snippet.id} className="card p-4">
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <div>
+                            <h4 className="font-black text-white">{snippet.title}</h4>
+                            <div className="mt-1 text-xs font-bold text-slate-500">{snippet.language} - {snippet.complexity}</div>
+                          </div>
+                          <button className="icon-btn h-8 w-8" onClick={() => copy(snippet.code)} aria-label="Copy snippet">
+                            <Icon name="fa-copy" />
+                          </button>
+                        </div>
+                        <pre className="scrollbar mono max-h-36 overflow-auto rounded-lg bg-black/45 p-3 text-xs text-slate-300">{snippet.code}</pre>
+                        {snippet.notes && <p className="mt-3 text-sm text-slate-500">{snippet.notes}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            </section>
+          </main>
+
+          {addOpen && (
+            <Modal title="Add Snippet" onClose={() => setAddOpen(false)} wide>
+              <form onSubmit={addSnippet} className="grid gap-4 sm:grid-cols-2">
+                <input className="input" required placeholder="Title" value={form.title} onChange={event => setForm({...form, title: event.target.value})} />
+                <select className="select" value={form.language} onChange={event => setForm({...form, language: event.target.value})}>
+                  {["C", "C++", "Python", "Java", "SQL"].map(item => <option key={item}>{item}</option>)}
+                </select>
+                <input className="input" placeholder="Complexity" value={form.complexity} onChange={event => setForm({...form, complexity: event.target.value})} />
+                <input className="input" placeholder="Notes" value={form.notes} onChange={event => setForm({...form, notes: event.target.value})} />
+                <textarea className="textarea sm:col-span-2 mono" required placeholder="Code" value={form.code} onChange={event => setForm({...form, code: event.target.value})}></textarea>
+                <button className="btn btn-primary sm:col-span-2" type="submit">
+                  <Icon name="fa-cloud-arrow-up" /> Save to Cloud
+                </button>
+              </form>
+            </Modal>
+          )}
+        </>
+      );
+    };
+
+    const PlaygroundView = ({ showToast }) => {
+      const languages = {
+        "92": { name: "Python 3", label: "Python", template: "print('Hello BITStruq')" },
+        "50": { name: "C (GCC)", label: "C", template: "#include <stdio.h>\nint main(){\n  printf(\"Hello BITStruq\");\n  return 0;\n}" },
+        "54": { name: "C++ (GCC)", label: "C++", template: "#include <bits/stdc++.h>\nusing namespace std;\nint main(){\n  cout << \"Hello BITStruq\";\n  return 0;\n}" },
+        "62": { name: "Java", label: "Java", template: "class Main {\n  public static void main(String[] args) {\n    System.out.println(\"Hello BITStruq\");\n  }\n}" }
+      };
+
+      const [language, setLanguage] = useState("92");
+      const [code, setCode] = useState(languages["92"].template);
+      const [stdin, setStdin] = useState("");
+      const [output, setOutput] = useState("Awaiting execution...");
+      const [status, setStatus] = useState("Idle");
+      const [running, setRunning] = useState(false);
+
+      const toBase64 = (str) => btoa(unescape(encodeURIComponent(str || "")));
+      const fromBase64 = (str) => {
+        try {
+          const decoded = atob((str || "").replace(/\s/g, ""));
+          try { return decodeURIComponent(escape(decoded)); } catch (e) { return decoded; }
+        } catch (e) {
+          return str || "";
+        }
+      };
+
+      const run = async () => {
+        setRunning(true);
+        setOutput("");
+        setStatus("Executing...");
+
+        try {
+          // Send request securely to backend
+          const response = await fetch(`https://bitstruq-backend.onrender.com/api/execute`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              language_id: Number(language),
+              source_code: toBase64(code),
+              stdin: toBase64(stdin)
+            })
+          });
+
+          if (!response.ok) throw new Error(`Execution failed: ${response.status}`);
+          const result = await response.json();
+
+          const chunks = [
+            fromBase64(result.compile_output),
+            fromBase64(result.stdout),
+            fromBase64(result.stderr),
+            result.message
+          ].filter(Boolean);
+
+          setOutput(chunks.join("\n") || "No output");
+          setStatus("Completed");
+        } catch (error) {
+          setOutput(`Execution error: ${error.message}`);
+          setStatus("Failed");
+        } finally {
+          setRunning(false);
+        }
+      };
+
+      const switchLanguage = (id) => {
+        setLanguage(id);
+        setCode(languages[id].template);
+      };
+
+      return (
+        <>
+          <AIAssistant contextArea="Programming" onApplyCode={setCode} showToast={showToast} />
+          
+          <main className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.08fr_.92fr]">
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h1 className="text-3xl font-black text-white">Code Playground</h1>
+                  <p className="mt-1 text-sm font-semibold text-slate-400">Write, test, and iterate across four languages.</p>
+                </div>
+                <button className="btn btn-primary px-6" onClick={run} disabled={running}>
+                  <Icon name={running ? "fa-circle-notch fa-spin" : "fa-play"} /> {running ? "Running" : "Run"}
+                </button>
+              </div>
+
+              <div className="surface rounded-lg p-3">
+                <div className="grid gap-2 sm:grid-cols-4">
+                  {Object.entries(languages).map(([id, item]) => (
+                    <button key={id} onClick={() => switchLanguage(id)} className={`rounded-lg px-3 py-2 text-sm font-black ${language === id ? "bg-cyan-300 text-slate-950" : "bg-white/[.05] text-slate-300"}`}>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <textarea className="code-editor" value={code} onChange={event => setCode(event.target.value)} spellCheck="false"></textarea>
+
+              <div className="flex flex-wrap gap-2 text-sm font-bold text-slate-500">
+                <span className="chip">{code.split("\n").length} lines</span>
+                <span className="chip">{code.length} chars</span>
+                <span className="chip">{languages[language].name}</span>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div className="surface rounded-lg p-4">
+                <h2 className="mb-3 text-xl font-black text-white">Input</h2>
+                <textarea className="textarea mono" value={stdin} onChange={event => setStdin(event.target.value)} placeholder="stdin"></textarea>
+              </div>
+
+              <div className="surface min-h-[470px] rounded-lg p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-xl font-black text-white">Output</h2>
+                  <span className="chip"><Icon name={running ? "fa-circle-notch fa-spin" : "fa-terminal"} /> {status}</span>
+                </div>
+                <pre className="scrollbar mono min-h-[380px] overflow-auto whitespace-pre-wrap rounded-lg border border-white/10 bg-black/55 p-4 text-sm text-emerald-300">{output}</pre>
+              </div>
+            </section>
+          </main>
+        </>
+      );
+    };
+
+    const ExchangeView = ({ showToast }) => {
+      const [experiences, setExperiences] = useState([]);
+      const [query, setQuery] = useState("");
+      const [open, setOpen] = useState(false);
+      const [form, setForm] = useState({ company: "", role: "", author: "", tags: "", experience: "" });
+
+      useEffect(() => {
+        fetch("https://bitstruq-backend.onrender.com/api/experiences")
+          .then(res => res.json())
+          .then(data => setExperiences(data))
+          .catch(err => console.error("Failed to load experiences:", err));
+      }, []);
+
+      const filtered = experiences.filter(item => `${item.company} ${item.role} ${item.author} ${item.tags} ${item.experience}`.toLowerCase().includes(query.toLowerCase()));
+
+      const submit = async (event) => {
+        event.preventDefault();
+        try {
+          const response = await fetch("https://bitstruq-backend.onrender.com/api/experiences", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form)
+          });
+          if (response.ok) {
+            const newExp = { ...form, id: Date.now() };
+            setExperiences([newExp, ...experiences]);
+            setOpen(false);
+            setForm({ company: "", role: "", author: "", tags: "", experience: "" });
+            showToast("Experience shared to Cloud!");
+          } else {
+             showToast("Failed to share experience");
+          }
+        } catch (err) {
+          showToast("Failed to share experience");
+        }
+      };
+
+      return (
+        <>
+          <main className="relative z-10 mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+            <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-black text-white">Campus Exchange</h1>
+                <p className="mt-1 text-sm font-semibold text-slate-400">Placement and internship experience board.</p>
+              </div>
+              <button className="btn btn-primary px-5" onClick={() => setOpen(true)}>
+                <Icon name="fa-plus" /> Share
+              </button>
+            </div>
+
+            <div className="surface mb-5 rounded-lg p-3">
+              <input className="input" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search company, role, tag" />
+            </div>
+
+            <div className="grid gap-4">
+              {filtered.length === 0 && <div className="text-center text-slate-500 py-10">No experiences found yet. Be the first to share!</div>}
+              {filtered.map(item => (
+                <article key={item.id} className="card p-5">
+                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-xl font-black text-white">{item.company} <span className="text-cyan-200">- {item.role}</span></h2>
+                      <p className="mt-1 text-sm font-bold text-slate-500">by {item.author || "Anonymous"}</p>
+                    </div>
+                    <span className="chip"><Icon name="fa-briefcase" /> Experience</span>
+                  </div>
+                  <p className="leading-7 text-slate-300">{item.experience}</p>
+                  {item.tags && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {item.tags.split(",").map(tag => <span key={tag} className="chip">{tag.trim()}</span>)}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </main>
+
+          {open && (
+            <Modal title="Share Experience" onClose={() => setOpen(false)} wide>
+              <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
+                <input className="input" required placeholder="Company" value={form.company} onChange={event => setForm({...form, company: event.target.value})} />
+                <input className="input" required placeholder="Role" value={form.role} onChange={event => setForm({...form, role: event.target.value})} />
+                <input className="input" placeholder="Your name" value={form.author} onChange={event => setForm({...form, author: event.target.value})} />
+                <input className="input" placeholder="Tags" value={form.tags} onChange={event => setForm({...form, tags: event.target.value})} />
+                <textarea className="textarea sm:col-span-2" required placeholder="Experience" value={form.experience} onChange={event => setForm({...form, experience: event.target.value})}></textarea>
+                <button className="btn btn-primary sm:col-span-2" type="submit">
+                  <Icon name="fa-cloud-arrow-up" /> Submit to Cloud
+                </button>
+              </form>
+            </Modal>
+          )}
+        </>
+      );
+    };
+
+    const Footer = ({ onAdminTrigger }) => {
+      const [feedbackOpen, setFeedbackOpen] = useState(false);
+      const [contactOpen, setContactOpen] = useState(false);
+      const [feedbackText, setFeedbackText] = useState("");
+      const [contact, setContact] = useState({ name: "", message: "" });
+
+      const submitFeedback = () => {
+        if (!feedbackText.trim()) return;
+        const updated = [{ text: feedbackText, date: new Date().toISOString() }, ...load(FEEDBACK_KEY, [])];
+        save(FEEDBACK_KEY, updated);
+        setFeedbackText("");
+        setFeedbackOpen(false);
+      };
+
+      const submitContact = () => {
+        if (!contact.message.trim()) return;
+        const updated = [{ name: contact.name, msg: contact.message, date: new Date().toISOString() }, ...load(CONTACT_KEY, [])];
+        save(CONTACT_KEY, updated);
+        setContact({ name: "", message: "" });
+        setContactOpen(false);
+      };
+
+      return (
+        <footer className="relative z-10 mt-12 border-t border-white/10 bg-[#07090f]/70">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 md:flex-row md:items-center md:justify-between">
+            <div className="text-sm font-semibold text-slate-500">
+              (c) BITStruq by <button onClick={onAdminTrigger} className="font-black text-cyan-300 hover:text-white">Aman Raj</button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button className="btn btn-secondary px-4" onClick={() => setFeedbackOpen(true)}><Icon name="fa-comment" /> Feedback</button>
+              <button className="btn btn-secondary px-4" onClick={() => setContactOpen(true)}><Icon name="fa-envelope" /> Contact</button>
+              <a className="btn btn-secondary px-4" href="https://www.linkedin.com/in/aman-raj-a46aa431b" target="_blank" rel="noreferrer">
+                <i className="fa-brands fa-linkedin"></i> LinkedIn
+              </a>
+            </div>
+          </div>
+
+          {feedbackOpen && (
+            <Modal title="Feedback" onClose={() => setFeedbackOpen(false)}>
+              <textarea className="textarea" value={feedbackText} onChange={event => setFeedbackText(event.target.value)} placeholder="Your suggestions"></textarea>
+              <button className="btn btn-primary mt-4 w-full" onClick={submitFeedback}>Submit</button>
+            </Modal>
+          )}
+
+          {contactOpen && (
+            <Modal title="Contact Developer" onClose={() => setContactOpen(false)}>
+              <div className="space-y-3">
+                <input className="input" value={contact.name} onChange={event => setContact({...contact, name: event.target.value})} placeholder="Your name" />
+                <textarea className="textarea" value={contact.message} onChange={event => setContact({...contact, message: event.target.value})} placeholder="Message"></textarea>
+                <button className="btn btn-primary w-full" onClick={submitContact}>Send</button>
+              </div>
+            </Modal>
+          )}
+        </footer>
+      );
+    };
+
+    const AdminPanel = ({ onClose }) => {
+      const [feedbacks] = useState(() => load(FEEDBACK_KEY, []));
+      const [contacts] = useState(() => load(CONTACT_KEY, []));
+
+      return (
+        <Modal title="Admin Panel" onClose={onClose} wide>
+          <div className="grid gap-5 md:grid-cols-2">
+            <section>
+              <h4 className="mb-3 font-black text-cyan-200">Feedbacks ({feedbacks.length})</h4>
+              <div className="grid gap-2">
+                {feedbacks.length === 0 && <div className="text-sm text-slate-500">No feedback yet.</div>}
+                {feedbacks.map((item, index) => (
+                  <div key={index} className="rounded-lg border border-white/10 bg-black/35 p-3 text-sm text-slate-300">
+                    {item.text}
+                    <div className="mt-2 text-xs text-slate-600">{new Date(item.date).toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section>
+              <h4 className="mb-3 font-black text-cyan-200">Contacts ({contacts.length})</h4>
+              <div className="grid gap-2">
+                {contacts.length === 0 && <div className="text-sm text-slate-500">No contacts yet.</div>}
+                {contacts.map((item, index) => (
+                  <div key={index} className="rounded-lg border border-white/10 bg-black/35 p-3 text-sm text-slate-300">
+                    <strong className="text-white">{item.name || "Anonymous"}</strong>: {item.msg}
+                    <div className="mt-2 text-xs text-slate-600">{new Date(item.date).toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </Modal>
+      );
+    };
+
+    function App() {
+      const [currentView, setCurrentView] = useState("loading");
+      const [adminOpen, setAdminOpen] = useState(false);
+      const { toast, showToast } = useToast();
+
+      useEffect(() => {
+        const timer = setTimeout(() => setCurrentView("home"), 1600);
+        return () => clearTimeout(timer);
+      }, []);
+
+      const handleAdmin = () => {
+        const pass = prompt("Enter admin password:");
+        if (pass === "bitstruq") setAdminOpen(true);
+        else if (pass !== null) alert("Wrong password");
+      };
+
+      if (currentView === "loading") return <LoadingScreen />;
+
+      return (
+        <div className="app-shell">
+          <Navbar currentView={currentView} setCurrentView={setCurrentView} />
+
+          {currentView === "home" && <HomePage setCurrentView={setCurrentView} />}
+          {currentView === "sandbox" && <SandboxView showToast={showToast} />}
+          {currentView === "vault" && <VaultView showToast={showToast} />}
+          {currentView === "playground" && <PlaygroundView showToast={showToast} />}
+          {currentView === "exchange" && <ExchangeView showToast={showToast} />}
+
+          <Footer onAdminTrigger={handleAdmin} />
+
+          {adminOpen && <AdminPanel onClose={() => setAdminOpen(false)} />}
+          <Toast message={toast} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
